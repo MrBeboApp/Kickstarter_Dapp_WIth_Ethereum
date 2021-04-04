@@ -25,15 +25,6 @@ modifier inState(State expectedState){
     _;
 }
 
-function contribute() public payable inState(State.OnGoing){
-amounts[msg.sender] +=msg.value;
-totalCollected +=msg.value;
-
-if(totalCollected>=targetAmount){
-
-    collected = true;
-  }
-}
 
 
 
@@ -47,6 +38,17 @@ state = State.OnGoing;
 
 
 }
+
+function contribute() public payable inState(State.OnGoing){
+amounts[msg.sender] += msg.value;
+totalCollected +=msg.value;
+
+if(totalCollected >=targetAmount){
+
+    collected = true;
+  }
+}
+
 
 //create function that tell the contract what is time now
 
