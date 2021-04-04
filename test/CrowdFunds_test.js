@@ -1,4 +1,4 @@
-let crowdFundsTest = artifacts.require("./crowdfund.sol");
+let crowdFundsTest = artifacts.require("./crowdfundTest.sol");
 const BigNumber = require('bignumber.js');
 
 
