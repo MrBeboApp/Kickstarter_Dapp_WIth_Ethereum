@@ -7,11 +7,29 @@ contract CrowdFund{
     }
 
 string public name;
-uint public targetAmpunt;
+uint public targetAmount;
 uint public fundingDeadline;
 address public beneficiary;
 State public state;
 
 
+constructor (
+string memory name;
+uint  targetAmount;
+uint  durationInmin;
+address  beneficiary;
+){
+    name=name;
+targetAmount = targetAmount * 1 ether;
+fundingDeadline = currentTime() +durationInmin * 1 minutes;
+
+}
+
+//create function that tell the contract what is time now
+
+function currentTime() internal view returns(uint){
+    return now;
+
+}
 
 }
