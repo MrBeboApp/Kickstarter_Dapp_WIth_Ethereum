@@ -19,9 +19,12 @@ uint  targetAmount;
 uint  durationInmin;
 address  beneficiary;
 ){
-    name=name;
+name=name;
 targetAmount = targetAmount * 1 ether;
 fundingDeadline = currentTime() +durationInmin * 1 minutes;
+beneficiary =beneficiary;
+state = State.OnGoing;
+
 
 }
 
