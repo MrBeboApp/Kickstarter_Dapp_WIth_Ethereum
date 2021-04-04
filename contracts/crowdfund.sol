@@ -12,13 +12,33 @@ uint public fundingDeadline;
 address public beneficiary;
 State public state;
 
+//Funds list
+mapping(address=>uint) public amounts;
+//If collected or not
+bool public collected;
+//How many Contract Collected money
+uint public totalCollected;
 
-constructor (
-string memory name;
-uint  targetAmount;
-uint  durationInmin;
-address  beneficiary;
-){
+
+modifier inState(State expectedState){
+    require(state == expectedState,"Invaild State");
+    _;
+}
+
+function contribute() public payable inState(State.OnGoing){
+amounts[msg.sender] +=msg.value;
+totalCollected +=msg.value;
+
+if(totalCollected>=targetAmount){
+
+    collected = true;
+  }
+}
+
+
+
+
+constructor (string memory name,uint  targetAmount,uint  durationInmin,address  beneficiary) public{
 name=name;
 targetAmount = targetAmount * 1 ether;
 fundingDeadline = currentTime() +durationInmin * 1 minutes;
@@ -31,7 +51,7 @@ state = State.OnGoing;
 //create function that tell the contract what is time now
 
 function currentTime() internal view returns(uint){
-    return now;
+    return block.timestamp;
 
 }
 
