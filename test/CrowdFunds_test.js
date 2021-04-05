@@ -14,6 +14,7 @@ const OnGoing=0;
 const Failed = 1;
 const Succedded = 2;
 const PaidOut = 3;
+const ERROR_MSG = 'Returned error: VM Exception while processing transaction: revert';
 
 //Create init for my contarct with test value
 beforeEach(async function(){
@@ -43,6 +44,9 @@ it("Contract Created Success"),async function(){
     let targetAmount = await contract.targetAmount.call()
     expect(ONE_ETH.isEqualTo(targetAmount)).to.equal(true);
 
+    let fundingDeadline=await contract.fundingDeadline.call();
+    expect(fundingDeadline.toNumber).to.equal(600);
+
     let state = await contract.state.call()
     expect(state.valueOf().toNumber()).to.equal(OnGoing);
 
@@ -58,6 +62,80 @@ it('Funds are Contributed', async function() {
 
     let totalCollected = await contract.totalCollected.call();
     expect(ONE_ETH.isEqualTo(totalCollected)).to.equal(true);
+});
+
+
+it('Can not Contribute after deadline', async function() {
+    try {
+        await contract.setCurrentTime(601);
+        await contract.sendTransaction({
+            value:ONE_ETH,
+            from:contractCreatore
+        });
+        expect.fail();
+        
+    } catch (error) {
+        expect(error.message).to.equal(ERROR_MSG);
+    }
+});
+
+
+
+it('crowdfunding succeeded', async function() {
+    await contract.contribute({value: ONE_ETH, from: contractCreatore});
+    await contract.setCurrentTime(601);
+    await contract.finishFunds();
+    let state = await contract.state.call();
+
+    expect(state.valueOf().toNumber()).to.equal(Succedded);
+});
+
+it('crowdfunding failed', async function() {
+    await contract.setCurrentTime(601);
+    await contract.finishFunds();
+    let state = await contract.state.call();
+
+    expect(state.valueOf().toNumber()).to.equal(Failed);
+});
+
+
+it('collected money paid out', async function() {
+    await contract.contribute({value: ONE_ETH, from: contractCreatore});
+    await contract.setCurrentTime(601);
+    await contract.finishFunds();
+
+    let initAmount = await web3.eth.getBalance(beneficiary);
+    await contract.collect({from: contractCreatore});
+
+    let newBalance = await web3.eth.getBalance(beneficiary);
+    let difference = newBalance - initAmount;
+    expect(ONE_ETH.isEqualTo(difference)).to.equal(true);
+
+    let fundingState = await contract.state.call()
+    expect(fundingState.valueOf().toNumber()).to.equal(PaidOut);
+});
+
+it('withdraw funds from the contract', async function() {
+    await contract.contribute({value: ONE_ETH - 100, from: contractCreatore});
+    await contract.setCurrentTime(601);
+    await contract.finishFunds();
+
+    await contract.withdraw({from: contractCreatore});
+    let amount = await contract.amounts.call(contractCreatore);
+    expect(amount.toNumber()).to.equal(0);
+});
+
+
+it('event is emitted', async function() {
+    await contract.setCurrentTime(601);
+    const transaction = await contract.finishFunds();
+
+    const events = transaction.logs
+    expect(events.length).to.equal(1);
+
+    const event = events[0]
+    expect(event.args.totalCollected.toNumber()).to.equal(0);
+    expect(event.args.succeeded).to.equal(false);
 });
 
 
