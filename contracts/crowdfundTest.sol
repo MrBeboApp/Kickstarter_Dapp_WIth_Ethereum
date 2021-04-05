@@ -6,9 +6,11 @@ contract crowdfundTest  is  CrowdFund {
 
 uint time;
 
-constructor(string memory contractName,uint targetAmount,uint durationMinutes,address beneficiaryAdresss){
- CrowdFund(contractName,targetAmount,durationMinutes,beneficiaryAdresss);
-}
+constructor(string memory contractName,uint targetAmount,uint durationMinutes,address beneficiaryAdresss)
+
+ CrowdFund(contractName,targetAmount,durationMinutes,beneficiaryAdresss)public{
+
+ }
 
     function currentTime() internal view returns(uint) {
         return time;
